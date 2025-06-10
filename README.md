@@ -58,12 +58,12 @@ You can modify the parameters.
 ## 📄 Reference
 
 @article{Gong2025,
-  author  = {NANXIN GONG, SAORI TAKEYAMA, MASAHIRO YAMAGUCHI, TAKUMI URATA, FUMIKAZU KIMURA, and KEIKO ISHII},
+  author  = {Gong, Nanxin and Takeyama, Saori and Yamaguchi, Masahiro and Urata, Takumi and Kimura, Fumikazu and Ishii, Keiko},
   title   = {Papanicolaou Stain Unmixing for RGB Image Using Weighted Nucleus Sparsity and Total Variation Regularization},
   journal = {Computerized Medical Imaging and Graphics},
-  year    = {under review},
+  year    = {2025},
+  note    = {under review}
 }
-
 
 ---
 
