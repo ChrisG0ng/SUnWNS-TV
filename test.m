@@ -6,15 +6,16 @@ A = singleH';
 load('Calibration.mat');
 % f_E/f_H/f_L/f_O: calibration parameters
 
-load('Case05_E-L_04.mat');
-%--------------------------------------------------------%
-% bgX2: RGB intensities
-% C_N: ground truth of stain abundance (scaled to 0-1)
-%--------------------------------------------------------%
+% Load RGB image
+img = imread('Case05_E-L_04_RGB.jpg');
+bgX2 = im2double(img);
+
+load('Case05_E-L_04_GT.mat');
+% GT: ground truth of stain abundance (scaled to 0-1)
 
 
 %------------Calculate optical density from RGB image-------------
-[H,W,band] = size(C_N);
+[H,W,band] = size(GT);
 bgX1 = reshape(bgX2,W*H,3);
 bgX1_s = round(sum(bgX1,2),2);
 b99_t = tabulate(bgX1_s);
@@ -43,7 +44,7 @@ ODx(isnan(ODx(:,3)),3) = max_x(3);
 OD = reshape(ODx,H,W,3);
 
 %--------------Select ROI---------------
-ab = C_N(431:880,501:1050,:);
+ab = GT(431:880,501:1050,:);
 od = OD(431:880,501:1050,:);
 bgrgb = bgX2(431:880,501:1050,:);
 [h,w,band] = size(ab);
