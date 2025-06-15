@@ -132,7 +132,7 @@ for i = 1:4
     hm1.YDisplayLabels = repmat(' ',size(cd2,1), size(cd2,2));   % Blank Display Labels
     title({stain_names{i};['SRE=',num2str(SRE_X4(i),'%.4f'),'  RMSE=',num2str(RMSE_X4(i),'%.4f')]})
 end
-sgtitle({'SUnWNS';['SRE=',num2str(SRE_X,'%.4f'),'  RMSE=',num2str(RMSE_X,'%.4f')]})
+sgtitle({'SUnWNS-TV';['SRE=',num2str(SRE_X,'%.4f'),'  RMSE=',num2str(RMSE_X,'%.4f')]})
 
 
 
