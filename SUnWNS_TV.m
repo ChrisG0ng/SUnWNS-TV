@@ -1,7 +1,7 @@
 function [X,Res] = SUnWNS_TV(A,Y,varargin)
 
 %% [X,Res] = SUnWNS_TV(A,Y,varargin)
-%  
+%
 %  SUnWNS_TV -> Stain Unmixing with nonnegativity, Weight Nucleus Sparsity 
 %  and Total Variation is a stain unmixing method proposed for Papanicolaou 
 %  stain estimation from RGB images, which is introduced in
