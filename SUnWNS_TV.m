@@ -85,7 +85,7 @@ function [X,Res] = SUnWNS_TV(A,Y,varargin)
 %
 %        ||Xh||_1 is the standard l1 regularizer
 %
-%        ||HX||_{1,1} is the TV (isotropic regularizer)
+%        ||HX||_{1,1} is the TV (anisotropic regularizer)
 %
 %
 %         H is a linear operator that computes the horizontal and the
