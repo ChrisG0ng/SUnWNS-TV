@@ -43,7 +43,7 @@ You can modify the parameters.
 |----------|-------------|---------|
 | `Lam1`     | for weighted nucleus sparsity | `2e-6` |
 | `LamTV`    | for TV regularization         | `1e-3` |
-| `gamma`    | augmented Lagrangian weight   | `0.01` |
+| `gamma`    | augmented Lagrangian weight   | `0.005` |
 | `maxIter`  | Max iterations for ADMM       | `2000` |
 
 ---
