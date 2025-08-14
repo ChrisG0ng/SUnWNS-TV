@@ -7,7 +7,7 @@ load('Calibration.mat');
 % f_E/f_H/f_L/f_O: calibration parameters
 
 % Load RGB image
-img = imread('Case05_E-L_04_RGB.jpg');
+img = imread('Case05_E-L_04_RGB.tif');
 bgX2 = im2double(img);
 
 load('Case05_E-L_04_GT.mat');
@@ -43,6 +43,7 @@ ODx(isnan(ODx(:,2)),2) = max_x(2);
 ODx(isnan(ODx(:,3)),3) = max_x(3);
 OD = reshape(ODx,H,W,3);
 
+
 %--------------Select ROI---------------
 ab = GT(431:880,501:1050,:);
 od = OD(431:880,501:1050,:);
@@ -72,19 +73,82 @@ for i = 1:4
     title({stain_names{i};' '})
 end
 
+
+%% Traditional unmixing 
+%  Color Deconvolution using Moore-Penrose pseudo-inverse
+H0 = singleH;
+Hinv1 = pinv(H0);
+C2_1 = odx*Hinv1;
+
+% Calibration
+C2_1(:,1) = f_E(C2_1(:,1));
+C2_1(:,2) = f_H(C2_1(:,2));
+C2_1(:,3) = f_L(C2_1(:,3));
+C2_1(:,4) = f_O(C2_1(:,4));
+C2_1(C2_1<0)=0.0;
+C1 = reshape(C2_1,[h,w,4]);
+
+% Calculate SRE and RMSE
+Pab = sum(sum(ab1.^2));
+P_C = sum(sum((ab1-C2_1).^2));
+SRE_C = 10*log10(Pab/P_C);
+RMSE_C = rmse(C2_1,ab1,"all");
+P_E = sum(sum((ab1(:,1)).^2));
+P_H = sum(sum((ab1(:,2)).^2));
+P_L = sum(sum((ab1(:,3)).^2));
+P_O = sum(sum((ab1(:,4)).^2));
+PC_E_E = sum(sum((ab1(:,1)-C2_1(:,1)).^2));
+PC_E_H = sum(sum((ab1(:,2)-C2_1(:,2)).^2));
+PC_E_L = sum(sum((ab1(:,3)-C2_1(:,3)).^2));
+PC_E_O = sum(sum((ab1(:,4)-C2_1(:,4)).^2));
+SRE_C4(1) = 10*log10(P_E/PC_E_E);
+SRE_C4(2) = 10*log10(P_H/PC_E_H);
+SRE_C4(3) = 10*log10(P_L/PC_E_L);
+SRE_C4(4) = 10*log10(P_O/PC_E_O);
+RMSE_C4(1) = rmse(C2_1(:,1),ab1(:,1));
+RMSE_C4(2) = rmse(C2_1(:,2),ab1(:,2));
+RMSE_C4(3) = rmse(C2_1(:,3),ab1(:,3));
+RMSE_C4(4) = rmse(C2_1(:,4),ab1(:,4));
+
+% Estimated stain abundance map
+figure
+set(gcf,'Position',[0,0,w,h]);
+for i = 1:4
+    subplot(2,2,i)
+    hm1 = heatmap(C1(:,:,i),'GridVisible','off','CellLabelColor','none');
+    hm1.Colormap = jet;
+    clim([0 1])
+    cd1 = hm1.XDisplayLabels;                                    % Current Display Labels
+    hm1.XDisplayLabels = repmat(' ',size(cd1,1), size(cd1,2));   % Blank Display Labels
+    cd2 = hm1.YDisplayLabels;                                    % Current Display Labels
+    hm1.YDisplayLabels = repmat(' ',size(cd2,1), size(cd2,2));   % Blank Display Labels
+    title({stain_names{i};['SRE=',num2str(SRE_C4(i),'%.4f'),'  RMSE=',num2str(RMSE_C4(i),'%.4f')]})
+end
+sgtitle({'Color Deconvolution';['SRE=',num2str(SRE_C,'%.4f'),'  RMSE=',num2str(RMSE_C,'%.4f')]})
+
+
 %% Stain Unmixing with nonnegativity, Weight Nucleus Sparsity and Total Variation
 
 Y = odx';
 
 % Parameters (Can be modified)
-gamma = 0.01;
+gamma = 0.005;
 maxIter = 2000;
 Lam1 = 2e-6;
 LamTV = 1e-3;
 
-[X,Res_iX] = SUnWNS_TV(A,Y,'MU',gamma,'POSITIVITY','yes', ...
-                  'LAMBDA_1',Lam1,'LAMBDA_TV', LamTV, ...
-                  'IM_SIZE',[h,w],'AL_ITERS',maxIter, 'VERBOSE','yes');
+tic;
+[X, info] = SUnWNS_TV_opt(A, Y, ...
+    'IM_SIZE',   [h w], ...
+    'SPARSITY_MODE', 'wns', ...
+    'LAMBDA_1',  Lam1, ...     
+    'LAMBDA_TV', LamTV, ...     
+    'POSITIVITY','yes', ...
+    'MU',        gamma, ...
+    'AL_ITERS',  maxIter, ...
+    'VERBOSE',   'yes', ...
+    'PRECISION', 'single');
+toc;
 
 Xp = X';
 Xp = reshape(Xp, [h,w,4]);
@@ -134,56 +198,3 @@ for i = 1:4
 end
 sgtitle({'SUnWNS-TV';['SRE=',num2str(SRE_X,'%.4f'),'  RMSE=',num2str(RMSE_X,'%.4f')]})
 
-
-
-% %% Traditional unmixing 
-% %  Color Deconvolution using Moore-Penrose pseudo-inverse
-% H0 = singleH;
-% Hinv1 = pinv(H0);
-% C2_1 = odx*Hinv1;
-% 
-% % Calibration
-% C2_1(:,1) = f_E(C2_1(:,1));
-% C2_1(:,2) = f_H(C2_1(:,2));
-% C2_1(:,3) = f_L(C2_1(:,3));
-% C2_1(:,4) = f_O(C2_1(:,4));
-% C2_1(C2_1<0)=0.0;
-% C1 = reshape(C2_1,[h,w,4]);
-% 
-% % Calculate SRE and RMSE
-% Pab = sum(sum(ab1.^2));
-% P_C = sum(sum((ab1-C2_1).^2));
-% SRE_C = 10*log10(Pab/P_C);
-% RMSE_C = rmse(C2_1,ab1,"all");
-% P_E = sum(sum((ab1(:,1)).^2));
-% P_H = sum(sum((ab1(:,2)).^2));
-% P_L = sum(sum((ab1(:,3)).^2));
-% P_O = sum(sum((ab1(:,4)).^2));
-% PC_E_E = sum(sum((ab1(:,1)-C2_1(:,1)).^2));
-% PC_E_H = sum(sum((ab1(:,2)-C2_1(:,2)).^2));
-% PC_E_L = sum(sum((ab1(:,3)-C2_1(:,3)).^2));
-% PC_E_O = sum(sum((ab1(:,4)-C2_1(:,4)).^2));
-% SRE_C4(1) = 10*log10(P_E/PC_E_E);
-% SRE_C4(2) = 10*log10(P_H/PC_E_H);
-% SRE_C4(3) = 10*log10(P_L/PC_E_L);
-% SRE_C4(4) = 10*log10(P_O/PC_E_O);
-% RMSE_C4(1) = rmse(C2_1(:,1),ab1(:,1));
-% RMSE_C4(2) = rmse(C2_1(:,2),ab1(:,2));
-% RMSE_C4(3) = rmse(C2_1(:,3),ab1(:,3));
-% RMSE_C4(4) = rmse(C2_1(:,4),ab1(:,4));
-% 
-% % Estimated stain abundance map
-% figure
-% set(gcf,'Position',[0,0,w,h]);
-% for i = 1:4
-%     subplot(2,2,i)
-%     hm1 = heatmap(C1(:,:,i),'GridVisible','off','CellLabelColor','none');
-%     hm1.Colormap = jet;
-%     clim([0 1])
-%     cd1 = hm1.XDisplayLabels;                                    % Current Display Labels
-%     hm1.XDisplayLabels = repmat(' ',size(cd1,1), size(cd1,2));   % Blank Display Labels
-%     cd2 = hm1.YDisplayLabels;                                    % Current Display Labels
-%     hm1.YDisplayLabels = repmat(' ',size(cd2,1), size(cd2,2));   % Blank Display Labels
-%     title({stain_names{i};['SRE=',num2str(SRE_C4(i),'%.4f'),'  RMSE=',num2str(RMSE_C4(i),'%.4f')]})
-% end
-% sgtitle({'Color Deconvolution';['SRE=',num2str(SRE_C,'%.4f'),'  RMSE=',num2str(RMSE_C,'%.4f')]})
