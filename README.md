@@ -21,13 +21,13 @@ This repository contains the MATLAB implementation of the **SUnWNS_TV** algorith
 ```
 SUnWNS_TV/
 ├── test.m                      # Main script for running the algorithm
-├── SUnWNS_TV.m                 # Core unmixing algorithm
+├── SUnWNS_TV_opt.m                 # Core unmixing algorithm
 ├── Dependency/
 │   ├── RGB_absor.mat           # Stain absorption coefficient matrix
 │   └── Calibration.mat         # Calibration parameters
 ├── data/
-│   ├── Case05_E-L_04_RGB.jpg   # RGB image for test
-│   └── Case05_E-L_04_GT.mat    # Stain abundanceround ground truth of the test image
+│   ├── Case05_E-L_04_RGB.tif   # RGB image for test
+│   └── Case05_E-L_04_GT.mat    # Stain abundance ground truth of the test image
 └── README.md
 ```
 
@@ -60,7 +60,7 @@ You can modify the parameters.
 @article{Gong2025,
   author  = {Gong, Nanxin and Takeyama, Saori and Yamaguchi, Masahiro and Urata, Takumi and Kimura, Fumikazu and Ishii, Keiko},
   title   = {Papanicolaou Stain Unmixing for RGB Image Using Weighted Nucleus Sparsity and Total Variation Regularization},
-  journal = {Computerized Medical Imaging and Graphics},
+  journal = {Medical & Biological Engineering & Computing},
   year    = {2025},
   note    = {under review}
 }
